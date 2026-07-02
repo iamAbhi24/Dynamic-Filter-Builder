@@ -136,12 +136,12 @@ function App() {
         <section className="table-card">
           <FilterBuilder onChange={handleFiltersChange} />
           <Box sx={{ mb: 2, mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <strong>{filteredEmployees.length}</strong> employees matching filters
+            <strong> Total: {filteredEmployees.length}</strong> 
             <Button variant="outlined" size="small" startIcon={<Download size={16} />} onClick={exportToCsv}>
               Export CSV
             </Button>
           </Box>
-          <DataTable rows={filteredEmployees} columns={columns} emptyMessage="No employee records found." />
+          <DataTable rows={filteredEmployees} columns={columns} emptyMessage="No results" />
         </section>
       )}
     </main>
