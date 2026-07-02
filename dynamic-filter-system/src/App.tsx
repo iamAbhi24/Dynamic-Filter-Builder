@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import './App.css'
 import { DataTable, type ColumnDefinition } from './components/DataTable'
 import { FilterBuilder } from './components/FilterBuilder.tsx'
@@ -25,11 +25,28 @@ function App() {
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeFilters, setActiveFilters] = useState<FilterCondition[]>([])
+  const [activeFilters, setActiveFilters] = useState<FilterCondition[]>(() => {
+    if (typeof window === 'undefined') {
+      return []
+    }
+
+    try {
+      const saved = window.localStorage.getItem('employee-filters')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
 
   const handleFiltersChange = useCallback((filters: FilterCondition[]) => {
     setActiveFilters(filters)
   }, [])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('employee-filters', JSON.stringify(activeFilters))
+    }
+  }, [activeFilters])
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -72,6 +89,33 @@ function App() {
 
   const filteredEmployees = useMemo(() => filterRows(employees, activeFilters), [employees, activeFilters])
 
+  const exportToCsv = () => {
+    const headers = ['id', 'name', 'department', 'role', 'status', 'salary', 'city', 'joinDate', 'isActive']
+    const rows = filteredEmployees.map((employee) => [
+      employee.id,
+      employee.name,
+      employee.department,
+      employee.role,
+      employee.status,
+      employee.salary,
+      employee.address.city,
+      employee.joinDate,
+      employee.isActive,
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))
+      .join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'employees.csv'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -89,8 +133,11 @@ function App() {
       {!loading && !error && (
         <section className="table-card">
           <FilterBuilder onChange={handleFiltersChange} />
-          <Box sx={{ mb: 2, mt: 2 }}>
+          <Box sx={{ mb: 2, mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong>{filteredEmployees.length}</strong> employees matching filters
+            <Button variant="outlined" size="small" onClick={exportToCsv}>
+              Export CSV
+            </Button>
           </Box>
           <DataTable rows={filteredEmployees} columns={columns} emptyMessage="No employee records found." />
         </section>
