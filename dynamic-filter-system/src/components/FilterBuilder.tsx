@@ -8,12 +8,14 @@ export type FilterRow = {
   value: string
 }
 
+type FieldType = 'text' | 'number' | 'date' | 'select'
+
 const fieldOptions = [
-  { value: 'name', label: 'Name' },
-  { value: 'department', label: 'Department' },
-  { value: 'status', label: 'Status' },
-  { value: 'salary', label: 'Salary' },
-  { value: 'joinDate', label: 'Join Date' },
+  { value: 'name', label: 'Name', type: 'text' as FieldType },
+  { value: 'department', label: 'Department', type: 'select' as FieldType },
+  { value: 'status', label: 'Status', type: 'select' as FieldType },
+  { value: 'salary', label: 'Salary', type: 'number' as FieldType },
+  { value: 'joinDate', label: 'Join Date', type: 'date' as FieldType },
 ]
 
 const operatorOptions = [
@@ -21,6 +23,68 @@ const operatorOptions = [
   { value: 'equals', label: 'Equals' },
   { value: 'greaterThan', label: 'Greater than' },
 ]
+
+const selectOptions = {
+  department: ['Engineering', 'Operations', 'Finance', 'HR', 'Marketing', 'Sales', 'Legal', 'Design'],
+  status: ['Active', 'Inactive', 'On Leave', 'Probation'],
+}
+
+type FilterValueInputProps = {
+  field: string
+  value: string
+  onChange: (value: string) => void
+}
+
+function FilterValueInput({ field, value, onChange }: FilterValueInputProps) {
+  const fieldConfig = fieldOptions.find((option) => option.value === field)
+  const type = fieldConfig?.type ?? 'text'
+
+  if (type === 'select') {
+    return (
+      <FormControl size="small">
+        <Select value={value} onChange={(event) => onChange(event.target.value)}>
+          {(selectOptions[field as keyof typeof selectOptions] ?? []).map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    )
+  }
+
+  if (type === 'number') {
+    return (
+      <TextField
+        size="small"
+        type="number"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder="Enter number"
+      />
+    )
+  }
+
+  if (type === 'date') {
+    return (
+      <TextField
+        size="small"
+        type="date"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    )
+  }
+
+  return (
+    <TextField
+      size="small"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder="Enter value"
+    />
+  )
+}
 
 export function FilterBuilder() {
   const [filters, setFilters] = useState<FilterRow[]>([
@@ -80,11 +144,10 @@ export function FilterBuilder() {
               </Select>
             </FormControl>
 
-            <TextField
-              size="small"
+            <FilterValueInput
+              field={filter.field}
               value={filter.value}
-              onChange={(event) => updateFilter(filter.id, 'value', event.target.value)}
-              placeholder="Enter value"
+              onChange={(value) => updateFilter(filter.id, 'value', value)}
             />
 
             <Button color="inherit" onClick={() => removeFilter(filter.id)}>
