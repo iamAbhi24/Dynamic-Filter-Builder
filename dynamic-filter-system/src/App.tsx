@@ -105,6 +105,7 @@ function App() {
     ])
 
     const csvContent = [headers, ...rows]
+      // Double quotes inside cells must be escaped for valid CSV output.
       .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))
       .join('\n')
 
