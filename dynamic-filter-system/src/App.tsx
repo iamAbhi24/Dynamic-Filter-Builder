@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Box, Typography } from '@mui/material'
 import './App.css'
+import { DataTable, type ColumnDefinition } from './components/DataTable'
 
 type Employee = {
   id: number
@@ -41,13 +43,31 @@ function App() {
     fetchEmployees()
   }, [])
 
+  const columns: ColumnDefinition<Employee>[] = [
+    { key: 'name', label: 'Name' },
+    { key: 'department', label: 'Department' },
+    { key: 'role', label: 'Role' },
+    { key: 'status', label: 'Status' },
+    {
+      key: 'salary',
+      label: 'Salary',
+      render: (value) => `$${Number(value).toLocaleString()}`,
+    },
+    {
+      key: 'address',
+      label: 'City',
+      render: (value) => (value as Employee['address']).city,
+    },
+  ]
+
   return (
     <main className="app-shell">
       <header className="app-header">
         <div>
           <p className="eyebrow">Dynamic Filter System</p>
-          <h1>Employee Directory</h1>
-         
+          <Typography variant="h4" component="h1">
+            Employee Directory
+          </Typography>
         </div>
       </header>
 
@@ -56,33 +76,10 @@ function App() {
 
       {!loading && !error && (
         <section className="table-card">
-          <div className="table-summary">
+          <Box sx={{ mb: 2 }}>
             <strong>{employees.length}</strong> employees loaded
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Salary</th>
-                <th>City</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.map((employee) => (
-                <tr key={employee.id}>
-                  <td>{employee.name}</td>
-                  <td>{employee.department}</td>
-                  <td>{employee.role}</td>
-                  <td>{employee.status}</td>
-                  <td>${employee.salary.toLocaleString()}</td>
-                  <td>{employee.address.city}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          </Box>
+          <DataTable rows={employees} columns={columns} emptyMessage="No employee records found." />
         </section>
       )}
     </main>
