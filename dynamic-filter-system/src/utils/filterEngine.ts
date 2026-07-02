@@ -115,7 +115,7 @@ export function filterRows<T extends Record<string, unknown>>(rows: T[], filters
     return accumulator
   }, {})
 
-  return rows.filter((row) =>
-    Object.values(groupedFilters).every((fieldFilters) => fieldFilters.some((filter) => matchesFilter(row, filter))),
-  )
+  const fieldGroups = Object.values(groupedFilters)
+
+  return rows.filter((row) => fieldGroups.every((fieldFilters) => fieldFilters.some((filter) => matchesFilter(row, filter))))
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import './App.css'
 import { DataTable, type ColumnDefinition } from './components/DataTable'
@@ -27,6 +27,10 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [activeFilters, setActiveFilters] = useState<FilterCondition[]>([])
 
+  const handleFiltersChange = useCallback((filters: FilterCondition[]) => {
+    setActiveFilters(filters)
+  }, [])
+
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -46,7 +50,7 @@ function App() {
     fetchEmployees()
   }, [])
 
-  const columns: ColumnDefinition<Employee>[] = [
+  const columns = useMemo<ColumnDefinition<Employee>[]>(() => [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'department', label: 'Department', sortable: true },
     { key: 'role', label: 'Role', sortable: true },
@@ -64,7 +68,7 @@ function App() {
       sortValue: (row) => row.address.city,
       render: (value) => (value as Employee['address']).city,
     },
-  ]
+  ], [])
 
   const filteredEmployees = useMemo(() => filterRows(employees, activeFilters), [employees, activeFilters])
 
@@ -84,7 +88,7 @@ function App() {
 
       {!loading && !error && (
         <section className="table-card">
-          <FilterBuilder onChange={setActiveFilters} />
+          <FilterBuilder onChange={handleFiltersChange} />
           <Box sx={{ mb: 2, mt: 2 }}>
             <strong>{filteredEmployees.length}</strong> employees matching filters
           </Box>
