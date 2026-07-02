@@ -1,14 +1,5 @@
-export type FilterOperator = 'contains' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith' | 'notContains' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'before' | 'after' | 'between' | 'in' | 'notIn'
-
-export type FilterValue = string | number | boolean | string[] | null
-
-export type FilterCondition = {
-  id: number
-  field: string
-  operator: FilterOperator
-  value: FilterValue
-  value2?: FilterValue
-}
+import type { FilterCondition, FilterOperator, FilterValue } from '../types/filters'
+export type { FilterCondition, FilterOperator, FilterValue } from '../types/filters'
 
 function getValueByPath<T extends Record<string, unknown>>(item: T, path: string): unknown {
   return path.split('.').reduce<unknown>((current, key) => {
