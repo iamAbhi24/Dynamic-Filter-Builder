@@ -1,11 +1,13 @@
 export type FilterOperator = 'contains' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith' | 'notContains' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'before' | 'after' | 'between' | 'in' | 'notIn'
 
+export type FilterValue = string | number | boolean | string[] | null
+
 export type FilterCondition = {
   id: number
   field: string
   operator: FilterOperator
-  value: string | number | boolean | null
-  value2?: string | number | boolean | null
+  value: FilterValue
+  value2?: FilterValue
 }
 
 function getValueByPath<T extends Record<string, unknown>>(item: T, path: string): unknown {
@@ -37,7 +39,7 @@ function normalizeArray(value: unknown): string[] {
   return []
 }
 
-function compareValues(actual: unknown, expected: string | number | boolean | null, operator: FilterOperator, secondValue?: string | number | boolean | null) {
+function compareValues(actual: unknown, expected: FilterValue, operator: FilterOperator, secondValue?: FilterValue) {
   if (operator === 'contains') {
     if (Array.isArray(actual)) {
       return normalizeArray(actual).includes(normalizeString(expected))
@@ -140,11 +142,21 @@ function compareValues(actual: unknown, expected: string | number | boolean | nu
 
   if (operator === 'in') {
     const values = normalizeArray(expected)
+
+    if (Array.isArray(actual)) {
+      return normalizeArray(actual).some((entry) => values.includes(entry))
+    }
+
     return values.length > 0 && values.includes(normalizeString(actual))
   }
 
   if (operator === 'notIn') {
     const values = normalizeArray(expected)
+
+    if (Array.isArray(actual)) {
+      return values.length === 0 || !normalizeArray(actual).some((entry) => values.includes(entry))
+    }
+
     return values.length === 0 || !values.includes(normalizeString(actual))
   }
 
