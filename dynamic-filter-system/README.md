@@ -1,32 +1,50 @@
-# React + TypeScript + Vite
+# Dynamic Filter System
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A reusable React + TypeScript employee directory demo with:
 
-Currently, two official plugins are available:
+- dynamic filter rows
+- field-aware operator selection
+- text, number, date, boolean, and array filtering
+- localStorage persistence
+- CSV export
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Prerequisites
 
-## React Compiler
+- Node.js 18+ recommended
+- npm 9+
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Install dependencies
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Run the app locally
+
+This project uses a local mock API for employee data.
+
+1. Start the mock API server:
+
+```bash
+node mock-server.cjs
+```
+
+2. In a second terminal, start the Vite app:
+
+```bash
+npm run dev
+```
+
+3. Open the local URL shown by Vite (usually http://localhost:5173).
+
+## Build for production
+
+```bash
+npm run build
+```
+
+## Notes
+
+- The app fetches employee data from the mock API at /api/employees.
+- Filter state is persisted in the browser via localStorage.
+- The current filtered rows can be exported as CSV from the UI.
