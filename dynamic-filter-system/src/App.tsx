@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import './App.css'
 import { DataTable, type ColumnDefinition } from './components/DataTable'
+import { FilterBuilder } from './components/FilterBuilder'
 
 type Employee = {
   id: number
@@ -76,7 +77,8 @@ function App() {
 
       {!loading && !error && (
         <section className="table-card">
-          <Box sx={{ mb: 2 }}>
+          <FilterBuilder />
+          <Box sx={{ mb: 2, mt: 2 }}>
             <strong>{employees.length}</strong> employees loaded
           </Box>
           <DataTable rows={employees} columns={columns} emptyMessage="No employee records found." />

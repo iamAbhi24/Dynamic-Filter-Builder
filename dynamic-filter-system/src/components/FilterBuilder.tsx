@@ -1,0 +1,104 @@
+import { useState } from 'react'
+import { Box, Button, Chip, FormControl, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material'
+
+export type FilterRow = {
+  id: number
+  field: string
+  operator: string
+  value: string
+}
+
+const fieldOptions = [
+  { value: 'name', label: 'Name' },
+  { value: 'department', label: 'Department' },
+  { value: 'status', label: 'Status' },
+  { value: 'salary', label: 'Salary' },
+  { value: 'joinDate', label: 'Join Date' },
+]
+
+const operatorOptions = [
+  { value: 'contains', label: 'Contains' },
+  { value: 'equals', label: 'Equals' },
+  { value: 'greaterThan', label: 'Greater than' },
+]
+
+export function FilterBuilder() {
+  const [filters, setFilters] = useState<FilterRow[]>([
+    { id: 1, field: 'name', operator: 'contains', value: '' },
+  ])
+
+  const addFilter = () => {
+    const nextId = Date.now()
+    setFilters((current) => [...current, { id: nextId, field: 'department', operator: 'contains', value: '' }])
+  }
+
+  const removeFilter = (id: number) => {
+    setFilters((current) => current.filter((filter) => filter.id !== id))
+  }
+
+  const updateFilter = (id: number, key: keyof FilterRow, value: string) => {
+    setFilters((current) =>
+      current.map((filter) => (filter.id === id ? { ...filter, [key]: value } : filter)),
+    )
+  }
+
+  return (
+    <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">Filter Builder</Typography>
+        <Button variant="contained" onClick={addFilter}>
+          Add Filter
+        </Button>
+      </Box>
+
+      <Stack spacing={2}>
+        {filters.map((filter) => (
+          <Box key={filter.id} sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: '1.2fr 1fr 1.4fr auto' }}>
+            <FormControl size="small">
+              <Select
+                value={filter.field}
+                onChange={(event) => updateFilter(filter.id, 'field', event.target.value)}
+              >
+                {fieldOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small">
+              <Select
+                value={filter.operator}
+                onChange={(event) => updateFilter(filter.id, 'operator', event.target.value)}
+              >
+                {operatorOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              size="small"
+              value={filter.value}
+              onChange={(event) => updateFilter(filter.id, 'value', event.target.value)}
+              placeholder="Enter value"
+            />
+
+            <Button color="inherit" onClick={() => removeFilter(filter.id)}>
+              Remove
+            </Button>
+          </Box>
+        ))}
+      </Stack>
+
+      {filters.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Chip label={`${filters.length} active filter${filters.length > 1 ? 's' : ''}`} />
+        </Box>
+      )}
+    </Paper>
+  )
+}
