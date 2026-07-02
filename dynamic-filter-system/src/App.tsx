@@ -47,18 +47,21 @@ function App() {
   }, [])
 
   const columns: ColumnDefinition<Employee>[] = [
-    { key: 'name', label: 'Name' },
-    { key: 'department', label: 'Department' },
-    { key: 'role', label: 'Role' },
-    { key: 'status', label: 'Status' },
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'department', label: 'Department', sortable: true },
+    { key: 'role', label: 'Role', sortable: true },
+    { key: 'status', label: 'Status', sortable: true },
     {
       key: 'salary',
       label: 'Salary',
+      sortable: true,
       render: (value) => `$${Number(value).toLocaleString()}`,
     },
     {
       key: 'address',
       label: 'City',
+      sortable: true,
+      sortValue: (row) => row.address.city,
       render: (value) => (value as Employee['address']).city,
     },
   ]
