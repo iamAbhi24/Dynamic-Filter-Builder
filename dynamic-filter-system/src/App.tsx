@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
+import { Download } from 'lucide-react'
 import './App.css'
 import { DataTable, type ColumnDefinition } from './components/DataTable'
 import { FilterBuilder } from './components/FilterBuilder.tsx'
@@ -135,7 +136,7 @@ function App() {
           <FilterBuilder onChange={handleFiltersChange} />
           <Box sx={{ mb: 2, mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong>{filteredEmployees.length}</strong> employees matching filters
-            <Button variant="outlined" size="small" onClick={exportToCsv}>
+            <Button variant="outlined" size="small" startIcon={<Download size={16} />} onClick={exportToCsv}>
               Export CSV
             </Button>
           </Box>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Chip, FormControl, FormHelperText, MenuItem, Paper, Select, Stack, Typography } from '@mui/material'
+import { Plus, Trash2, X } from 'lucide-react'
 import { fieldDefinitions, getFieldDefinition, getOperatorOptions } from '../config/filterConfig'
 import type { FilterCondition, FilterOperator, FilterRow, FilterValue } from '../types/filters'
 import { createFilterRow, getDefaultFilterValue, toFilterCondition } from '../utils/filterState'
@@ -65,10 +66,10 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <Typography variant="h6">Filter Builder</Typography>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={clearFilters} disabled={!filters.length}>
+          <Button variant="outlined" startIcon={<X size={16} />} onClick={clearFilters} disabled={!filters.length}>
             Clear All
           </Button>
-          <Button variant="contained" onClick={addFilter}>
+          <Button variant="contained" startIcon={<Plus size={16} />} onClick={addFilter}>
             Add Filter
           </Button>
         </Stack>
@@ -122,7 +123,7 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
                 {validationMessage ? <FormHelperText error>{validationMessage}</FormHelperText> : null}
               </Box>
 
-              <Button color="inherit" onClick={() => removeFilter(filter.id)}>
+              <Button color="inherit" startIcon={<Trash2 size={16} />} onClick={() => removeFilter(filter.id)}>
                 Remove
               </Button>
             </Box>

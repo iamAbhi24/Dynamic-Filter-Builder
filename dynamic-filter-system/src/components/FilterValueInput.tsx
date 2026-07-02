@@ -10,6 +10,7 @@ import {
   Switch,
   TextField,
 } from '@mui/material'
+import { Calendar } from 'lucide-react'
 import type { FieldDefinition, FilterOperator, FilterValue } from '../types/filters'
 import { asString, asStringArray } from '../utils/filterValueUtils'
 
@@ -35,7 +36,10 @@ export function FilterValueInput({ field, operator, value, value2, error, onChan
           value={asString(value)}
           onChange={(event) => onChange(event.target.value)}
           error={Boolean(error)}
-          slotProps={{ inputLabel: { shrink: true } }}
+          slotProps={{
+            inputLabel: { shrink: true },
+            input: { startAdornment: <InputAdornment position="start"><Calendar size={16} /></InputAdornment> },
+          }}
         />
         <TextField
           fullWidth
@@ -45,7 +49,10 @@ export function FilterValueInput({ field, operator, value, value2, error, onChan
           value={asString(value2 ?? '')}
           onChange={(event) => onChangeSecond(event.target.value)}
           error={Boolean(error)}
-          slotProps={{ inputLabel: { shrink: true } }}
+          slotProps={{
+            inputLabel: { shrink: true },
+            input: { startAdornment: <InputAdornment position="start"><Calendar size={16} /></InputAdornment> },
+          }}
         />
       </Stack>
     )
