@@ -51,7 +51,7 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
             ...filter,
             operator: value as FilterOperator,
             value: getDefaultFilterValue(field),
-            value2: field.type === 'date' || field.type === 'currency' ? '' : undefined,
+            value2: field.type === 'date' || field.type === 'currency' || value === 'between' ? '' : undefined,
           }
         }
 

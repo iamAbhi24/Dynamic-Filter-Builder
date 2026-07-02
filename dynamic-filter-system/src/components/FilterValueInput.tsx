@@ -84,6 +84,31 @@ export function FilterValueInput({ field, operator, value, value2, error, onChan
     )
   }
 
+  if (field.type === 'number' && operator === 'between') {
+    return (
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        <TextField
+          fullWidth
+          size="small"
+          type="number"
+          label="Min"
+          value={asString(value)}
+          onChange={(event) => onChange(event.target.value)}
+          error={Boolean(error)}
+        />
+        <TextField
+          fullWidth
+          size="small"
+          type="number"
+          label="Max"
+          value={asString(value2 ?? '')}
+          onChange={(event) => onChangeSecond(event.target.value)}
+          error={Boolean(error)}
+        />
+      </Stack>
+    )
+  }
+
   if (field.type === 'singleSelect') {
     return (
       <FormControl fullWidth size="small" error={Boolean(error)}>

@@ -68,6 +68,7 @@ export const operatorOptionsByType: Record<FieldType, OperatorOption[]> = {
     { value: 'lessThan', label: 'Less than' },
     { value: 'greaterThanOrEqual', label: 'Greater than or equal' },
     { value: 'lessThanOrEqual', label: 'Less than or equal' },
+    { value: 'between', label: 'Between' },
   ],
   date: [{ value: 'between', label: 'Between' }],
   currency: [{ value: 'between', label: 'Between' }],

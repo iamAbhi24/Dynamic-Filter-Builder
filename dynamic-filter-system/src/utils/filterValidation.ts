@@ -37,6 +37,14 @@ export function validateFilter(filter: FilterRow) {
     return Number(filter.value) <= Number(filter.value2) ? '' : 'Minimum amount must be less than maximum amount.'
   }
 
+  if (field.type === 'number' && filter.operator === 'between') {
+    if (!isValidNumber(filter.value) || !isValidNumber(filter.value2 ?? null)) {
+      return 'Enter valid minimum and maximum numbers.'
+    }
+
+    return Number(filter.value) <= Number(filter.value2) ? '' : 'Minimum number must be less than maximum number.'
+  }
+
   if (isBlank(filter.value)) {
     return 'Please enter a value.'
   }
