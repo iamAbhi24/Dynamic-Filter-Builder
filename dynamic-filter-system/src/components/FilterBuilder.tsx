@@ -7,9 +7,10 @@ export type FilterRow = {
   field: string
   operator: FilterOperator
   value: string
+  value2?: string
 }
 
-type FieldType = 'text' | 'number' | 'date' | 'select' | 'boolean'
+type FieldType = 'text' | 'number' | 'date' | 'select' | 'boolean' | 'array'
 
 const fieldOptions = [
   { value: 'name', label: 'Name', type: 'text' as FieldType },
@@ -19,13 +20,16 @@ const fieldOptions = [
   { value: 'joinDate', label: 'Join Date', type: 'date' as FieldType },
   { value: 'isActive', label: 'Active', type: 'boolean' as FieldType },
   { value: 'address.city', label: 'City', type: 'text' as FieldType },
-  { value: 'skills', label: 'Skills', type: 'text' as FieldType },
+  { value: 'skills', label: 'Skills', type: 'array' as FieldType },
 ]
 
 const operatorOptionsByType: Record<FieldType, Array<{ value: FilterOperator; label: string }>> = {
   text: [
     { value: 'contains', label: 'Contains' },
     { value: 'equals', label: 'Equals' },
+    { value: 'startsWith', label: 'Starts with' },
+    { value: 'endsWith', label: 'Ends with' },
+    { value: 'notContains', label: 'Does not contain' },
   ],
   select: [
     { value: 'equals', label: 'Equals' },
@@ -33,17 +37,25 @@ const operatorOptionsByType: Record<FieldType, Array<{ value: FilterOperator; la
   ],
   number: [
     { value: 'equals', label: 'Equals' },
+    { value: 'notEquals', label: 'Not equal' },
     { value: 'greaterThan', label: 'Greater than' },
+    { value: 'greaterThanOrEqual', label: 'Greater than or equal' },
     { value: 'lessThan', label: 'Less than' },
+    { value: 'lessThanOrEqual', label: 'Less than or equal' },
+    { value: 'between', label: 'Between' },
   ],
   date: [
     { value: 'equals', label: 'Equals' },
     { value: 'before', label: 'Before' },
     { value: 'after', label: 'After' },
+    { value: 'between', label: 'Between' },
   ],
   boolean: [
-    { value: 'equals', label: 'Equals' },
-    { value: 'notEquals', label: 'Not equal' },
+    { value: 'equals', label: 'Is' },
+  ],
+  array: [
+    { value: 'contains', label: 'Contains' },
+    { value: 'notContains', label: 'Does not contain' },
   ],
 }
 
@@ -55,8 +67,11 @@ const selectOptions = {
 type FilterValueInputProps = {
   field: string
   value: string
+  value2?: string
   onChange: (value: string) => void
+  onChangeSecond?: (value: string) => void
   error?: string
+  operator?: FilterOperator
 }
 
 function getFieldType(field: string): FieldType {
@@ -67,8 +82,32 @@ function getOperatorOptions(field: string) {
   return operatorOptionsByType[getFieldType(field)] ?? operatorOptionsByType.text
 }
 
-function FilterValueInput({ field, value, onChange, error }: FilterValueInputProps) {
+function FilterValueInput({ field, value, value2, onChange, onChangeSecond, error, operator }: FilterValueInputProps) {
   const type = getFieldType(field)
+
+  if (operator === 'between' && (type === 'number' || type === 'date')) {
+    return (
+      <Stack direction="row" spacing={1}>
+        <TextField
+          size="small"
+          type={type === 'number' ? 'number' : 'date'}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={type === 'number' ? 'Min' : 'Start'}
+          error={Boolean(error)}
+          helperText={error}
+        />
+        <TextField
+          size="small"
+          type={type === 'number' ? 'number' : 'date'}
+          value={value2 ?? ''}
+          onChange={(event) => onChangeSecond?.(event.target.value)}
+          placeholder={type === 'number' ? 'Max' : 'End'}
+          error={Boolean(error)}
+        />
+      </Stack>
+    )
+  }
 
   if (type === 'boolean') {
     return (
@@ -150,6 +189,10 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
     setFilters((current) => [...current, { id: nextId, field: 'department', operator: 'equals', value: '' }])
   }
 
+  const clearFilters = () => {
+    setFilters([])
+  }
+
   const removeFilter = (id: number) => {
     setFilters((current) => current.filter((filter) => filter.id !== id))
   }
@@ -167,6 +210,10 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
 
     if (filter.value === '' || filter.value === null) {
       return 'Please enter a value.'
+    }
+
+    if (filter.operator === 'between' && (!filter.value2 || filter.value2 === '')) {
+      return 'Please enter both range values.'
     }
 
     if (fieldType === 'number') {
@@ -195,6 +242,7 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
           field: filter.field,
           operator: filter.operator,
           value: filter.value,
+          value2: filter.value2,
         })),
     )
   }, [filters, onChange])
@@ -226,9 +274,14 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
     <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">Filter Builder</Typography>
-        <Button variant="contained" onClick={addFilter}>
-          Add Filter
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button variant="outlined" onClick={clearFilters} disabled={!filters.length}>
+            Clear All
+          </Button>
+          <Button variant="contained" onClick={addFilter}>
+            Add Filter
+          </Button>
+        </Stack>
       </Box>
 
       <Stack spacing={2}>
@@ -267,8 +320,11 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
               <FilterValueInput
                 field={filter.field}
                 value={filter.value}
+                value2={filter.value2}
                 onChange={(value) => updateFilter(filter.id, 'value', value)}
+                onChangeSecond={(value) => updateFilter(filter.id, 'value2', value)}
                 error={validateFilter(filter)}
+                operator={filter.operator}
               />
             </Box>
 
