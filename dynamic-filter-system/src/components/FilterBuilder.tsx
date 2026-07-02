@@ -18,11 +18,26 @@ const fieldOptions = [
   { value: 'joinDate', label: 'Join Date', type: 'date' as FieldType },
 ]
 
-const operatorOptions = [
-  { value: 'contains', label: 'Contains' },
-  { value: 'equals', label: 'Equals' },
-  { value: 'greaterThan', label: 'Greater than' },
-]
+const operatorOptionsByType = {
+  text: [
+    { value: 'contains', label: 'Contains' },
+    { value: 'equals', label: 'Equals' },
+  ],
+  select: [
+    { value: 'equals', label: 'Equals' },
+    { value: 'notEquals', label: 'Not equal' },
+  ],
+  number: [
+    { value: 'equals', label: 'Equals' },
+    { value: 'greaterThan', label: 'Greater than' },
+    { value: 'lessThan', label: 'Less than' },
+  ],
+  date: [
+    { value: 'equals', label: 'Equals' },
+    { value: 'before', label: 'Before' },
+    { value: 'after', label: 'After' },
+  ],
+}
 
 const selectOptions = {
   department: ['Engineering', 'Operations', 'Finance', 'HR', 'Marketing', 'Sales', 'Legal', 'Design'],
@@ -35,9 +50,16 @@ type FilterValueInputProps = {
   onChange: (value: string) => void
 }
 
+function getFieldType(field: string): FieldType {
+  return fieldOptions.find((option) => option.value === field)?.type ?? 'text'
+}
+
+function getOperatorOptions(field: string) {
+  return operatorOptionsByType[getFieldType(field)] ?? operatorOptionsByType.text
+}
+
 function FilterValueInput({ field, value, onChange }: FilterValueInputProps) {
-  const fieldConfig = fieldOptions.find((option) => option.value === field)
-  const type = fieldConfig?.type ?? 'text'
+  const type = getFieldType(field)
 
   if (type === 'select') {
     return (
@@ -93,7 +115,7 @@ export function FilterBuilder() {
 
   const addFilter = () => {
     const nextId = Date.now()
-    setFilters((current) => [...current, { id: nextId, field: 'department', operator: 'contains', value: '' }])
+    setFilters((current) => [...current, { id: nextId, field: 'department', operator: 'equals', value: '' }])
   }
 
   const removeFilter = (id: number) => {
@@ -102,7 +124,24 @@ export function FilterBuilder() {
 
   const updateFilter = (id: number, key: keyof FilterRow, value: string) => {
     setFilters((current) =>
-      current.map((filter) => (filter.id === id ? { ...filter, [key]: value } : filter)),
+      current.map((filter) => {
+        if (filter.id !== id) {
+          return filter
+        }
+
+        if (key === 'field') {
+          const nextOperators = getOperatorOptions(value)
+          const currentOperatorIsValid = nextOperators.some((option) => option.value === filter.operator)
+
+          return {
+            ...filter,
+            field: value,
+            operator: currentOperatorIsValid ? filter.operator : nextOperators[0].value,
+          }
+        }
+
+        return { ...filter, [key]: value }
+      }),
     )
   }
 
@@ -136,7 +175,7 @@ export function FilterBuilder() {
                 value={filter.operator}
                 onChange={(event) => updateFilter(filter.id, 'operator', event.target.value)}
               >
-                {operatorOptions.map((option) => (
+                {getOperatorOptions(filter.field).map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
                   </MenuItem>
