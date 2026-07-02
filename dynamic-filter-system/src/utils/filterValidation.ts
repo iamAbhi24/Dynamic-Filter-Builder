@@ -26,6 +26,7 @@ export function validateFilter(filter: FilterRow) {
       return 'Choose a valid start and end date.'
     }
 
+    // Date ranges need both valid dates and a sensible order.
     return Date.parse(asString(filter.value)) <= Date.parse(asString(filter.value2 ?? '')) ? '' : 'Start date must be before end date.'
   }
 
@@ -34,6 +35,7 @@ export function validateFilter(filter: FilterRow) {
       return 'Enter valid minimum and maximum amounts.'
     }
 
+    // Keep range filters from silently returning no results because min and max are swapped.
     return Number(filter.value) <= Number(filter.value2) ? '' : 'Minimum amount must be less than maximum amount.'
   }
 
@@ -42,6 +44,7 @@ export function validateFilter(filter: FilterRow) {
       return 'Enter valid minimum and maximum numbers.'
     }
 
+    // Number ranges use the same min <= max rule as currency ranges.
     return Number(filter.value) <= Number(filter.value2) ? '' : 'Minimum number must be less than maximum number.'
   }
 
