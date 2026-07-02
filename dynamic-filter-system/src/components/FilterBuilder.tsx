@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, Button, Chip, FormControl, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material'
+import type { FilterCondition, FilterOperator } from '../utils/filterEngine'
 
 export type FilterRow = {
   id: number
   field: string
-  operator: string
+  operator: FilterOperator
   value: string
 }
 
-type FieldType = 'text' | 'number' | 'date' | 'select'
+type FieldType = 'text' | 'number' | 'date' | 'select' | 'boolean'
 
 const fieldOptions = [
   { value: 'name', label: 'Name', type: 'text' as FieldType },
@@ -16,9 +17,12 @@ const fieldOptions = [
   { value: 'status', label: 'Status', type: 'select' as FieldType },
   { value: 'salary', label: 'Salary', type: 'number' as FieldType },
   { value: 'joinDate', label: 'Join Date', type: 'date' as FieldType },
+  { value: 'isActive', label: 'Active', type: 'boolean' as FieldType },
+  { value: 'address.city', label: 'City', type: 'text' as FieldType },
+  { value: 'skills', label: 'Skills', type: 'text' as FieldType },
 ]
 
-const operatorOptionsByType = {
+const operatorOptionsByType: Record<FieldType, Array<{ value: FilterOperator; label: string }>> = {
   text: [
     { value: 'contains', label: 'Contains' },
     { value: 'equals', label: 'Equals' },
@@ -36,6 +40,10 @@ const operatorOptionsByType = {
     { value: 'equals', label: 'Equals' },
     { value: 'before', label: 'Before' },
     { value: 'after', label: 'After' },
+  ],
+  boolean: [
+    { value: 'equals', label: 'Equals' },
+    { value: 'notEquals', label: 'Not equal' },
   ],
 }
 
@@ -60,6 +68,17 @@ function getOperatorOptions(field: string) {
 
 function FilterValueInput({ field, value, onChange }: FilterValueInputProps) {
   const type = getFieldType(field)
+
+  if (type === 'boolean') {
+    return (
+      <FormControl size="small">
+        <Select value={value} onChange={(event) => onChange(event.target.value)}>
+          <MenuItem value="true">True</MenuItem>
+          <MenuItem value="false">False</MenuItem>
+        </Select>
+      </FormControl>
+    )
+  }
 
   if (type === 'select') {
     return (
@@ -108,7 +127,11 @@ function FilterValueInput({ field, value, onChange }: FilterValueInputProps) {
   )
 }
 
-export function FilterBuilder() {
+type FilterBuilderProps = {
+  onChange?: (filters: FilterCondition[]) => void
+}
+
+export function FilterBuilder({ onChange }: FilterBuilderProps) {
   const [filters, setFilters] = useState<FilterRow[]>([
     { id: 1, field: 'name', operator: 'contains', value: '' },
   ])
@@ -122,6 +145,19 @@ export function FilterBuilder() {
     setFilters((current) => current.filter((filter) => filter.id !== id))
   }
 
+  useEffect(() => {
+    onChange?.(
+      filters
+        .filter((filter) => filter.value !== '' && filter.value !== null)
+        .map((filter) => ({
+          id: filter.id,
+          field: filter.field,
+          operator: filter.operator,
+          value: filter.value,
+        })),
+    )
+  }, [filters, onChange])
+
   const updateFilter = (id: number, key: keyof FilterRow, value: string) => {
     setFilters((current) =>
       current.map((filter) => {
@@ -131,7 +167,7 @@ export function FilterBuilder() {
 
         if (key === 'field') {
           const nextOperators = getOperatorOptions(value)
-          const currentOperatorIsValid = nextOperators.some((option) => option.value === filter.operator)
+          const currentOperatorIsValid = nextOperators.some((option: { value: FilterOperator; label: string }) => option.value === filter.operator)
 
           return {
             ...filter,
@@ -175,7 +211,7 @@ export function FilterBuilder() {
                 value={filter.operator}
                 onChange={(event) => updateFilter(filter.id, 'operator', event.target.value)}
               >
-                {getOperatorOptions(filter.field).map((option) => (
+                {getOperatorOptions(filter.field).map((option: { value: FilterOperator; label: string }) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
                   </MenuItem>

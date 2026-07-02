@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import './App.css'
 import { DataTable, type ColumnDefinition } from './components/DataTable'
-import { FilterBuilder } from './components/FilterBuilder'
+import { FilterBuilder } from './components/FilterBuilder.tsx'
+import { filterRows, type FilterCondition } from './utils/filterEngine'
 
 type Employee = {
   id: number
@@ -24,6 +25,7 @@ function App() {
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activeFilters, setActiveFilters] = useState<FilterCondition[]>([])
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -61,6 +63,8 @@ function App() {
     },
   ]
 
+  const filteredEmployees = useMemo(() => filterRows(employees, activeFilters), [employees, activeFilters])
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -77,11 +81,11 @@ function App() {
 
       {!loading && !error && (
         <section className="table-card">
-          <FilterBuilder />
+          <FilterBuilder onChange={setActiveFilters} />
           <Box sx={{ mb: 2, mt: 2 }}>
-            <strong>{employees.length}</strong> employees loaded
+            <strong>{filteredEmployees.length}</strong> employees matching filters
           </Box>
-          <DataTable rows={employees} columns={columns} emptyMessage="No employee records found." />
+          <DataTable rows={filteredEmployees} columns={columns} emptyMessage="No employee records found." />
         </section>
       )}
     </main>
