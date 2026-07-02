@@ -24,6 +24,14 @@ type FilterValueInputProps = {
   onChangeSecond: (value: FilterValue) => void
 }
 
+function DateIconAdornment() {
+  return (
+    <InputAdornment position="start">
+      <Calendar size={16} />
+    </InputAdornment>
+  )
+}
+
 export function FilterValueInput({ field, operator, value, value2, error, onChange, onChangeSecond }: FilterValueInputProps) {
   if (field.type === 'date' && operator === 'between') {
     return (
@@ -38,7 +46,7 @@ export function FilterValueInput({ field, operator, value, value2, error, onChan
           error={Boolean(error)}
           slotProps={{
             inputLabel: { shrink: true },
-            input: { startAdornment: <InputAdornment position="start"><Calendar size={16} /></InputAdornment> },
+            input: { startAdornment: <DateIconAdornment /> },
           }}
         />
         <TextField
@@ -51,7 +59,7 @@ export function FilterValueInput({ field, operator, value, value2, error, onChan
           error={Boolean(error)}
           slotProps={{
             inputLabel: { shrink: true },
-            input: { startAdornment: <InputAdornment position="start"><Calendar size={16} /></InputAdornment> },
+            input: { startAdornment: <DateIconAdornment /> },
           }}
         />
       </Stack>

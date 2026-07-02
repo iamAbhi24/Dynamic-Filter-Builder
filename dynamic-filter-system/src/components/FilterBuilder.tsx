@@ -48,6 +48,7 @@ export function FilterBuilder({ onChange }: FilterBuilderProps) {
         if (key === 'operator' && typeof value === 'string') {
           const field = getFieldDefinition(filter.field)
 
+          // Reset stale values when the new operator needs a different input shape.
           return {
             ...filter,
             operator: value as FilterOperator,

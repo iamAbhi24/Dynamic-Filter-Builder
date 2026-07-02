@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
+import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react'
 
 export type ColumnDefinition<T> = {
   key: keyof T
@@ -22,6 +23,14 @@ type SortConfig = {
   direction: SortDirection
 }
 
+function SortIcon({ active, direction }: { active: boolean; direction?: SortDirection }) {
+  if (!active) {
+    return <ChevronsUpDown size={14} />
+  }
+
+  return direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+}
+
 function getComparableValue<T extends Record<string, unknown>>(row: T, column: ColumnDefinition<T>) {
   if (column.sortValue) {
     return column.sortValue(row)
@@ -38,6 +47,7 @@ function getComparableValue<T extends Record<string, unknown>>(row: T, column: C
   }
 
   if (typeof value === 'object') {
+    // Objects need a stable primitive value before JavaScript can compare them.
     return JSON.stringify(value)
   }
 
@@ -66,6 +76,7 @@ export function DataTable<T extends Record<string, unknown>>({
       const leftValue = getComparableValue(left, column)
       const rightValue = getComparableValue(right, column)
 
+      // Keep null and undefined sortable without special cases in every column.
       const normalizedLeft = leftValue ?? ''
       const normalizedRight = rightValue ?? ''
 
@@ -122,7 +133,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <span>{column.label}</span>
                   {column.sortable && (
-                    <span>{sortConfig?.key === String(column.key) ? (sortConfig.direction === 'asc' ? '▲' : '▼') : '↕'}</span>
+                    <SortIcon active={sortConfig?.key === String(column.key)} direction={sortConfig?.direction} />
                   )}
                 </Box>
               </TableCell>

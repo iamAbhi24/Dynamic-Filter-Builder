@@ -2,6 +2,7 @@ import type { FilterCondition, FilterOperator, FilterValue } from '../types/filt
 export type { FilterCondition, FilterOperator, FilterValue } from '../types/filters'
 
 function getValueByPath<T extends Record<string, unknown>>(item: T, path: string): unknown {
+  // Allows filters to target nested fields such as "address.city".
   return path.split('.').reduce<unknown>((current, key) => {
     if (current && typeof current === 'object' && key in current) {
       return (current as Record<string, unknown>)[key]
@@ -175,5 +176,6 @@ export function filterRows<T extends Record<string, unknown>>(rows: T[], filters
 
   const fieldGroups = Object.values(groupedFilters)
 
+  // Different fields must all match. Same-field filters work as alternatives.
   return rows.filter((row) => fieldGroups.every((fieldFilters) => fieldFilters.some((filter) => matchesFilter(row, filter))))
 }
